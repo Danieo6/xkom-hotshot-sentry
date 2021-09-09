@@ -12,6 +12,7 @@ export class Xkom {
       return null;
     }
 
+    console.info(`New hotshot found: ${hotShot.name}`);
     this.currentOffer = hotShot.name;
     return hotShot;
   }

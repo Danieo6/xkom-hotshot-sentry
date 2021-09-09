@@ -1,9 +1,8 @@
 import { Telegraf } from "telegraf";
-import { Message } from "typegram";
 import { HotShot } from "./interfaces/hotshot.interface";
 
 export class Telegram extends Telegraf {
-  private chatId = 0;
+  private chats: number[] = [];
   public initialized = false;
 
   constructor(apiToken: string) {
@@ -12,33 +11,37 @@ export class Telegram extends Telegraf {
 
     // Register init command
     this.command("initialize", (context) => {
-      if (!this.chatId) {
-        this.chatId = context.chat.id;
+      if (!this.chats.includes(context.chat.id)) {
+        this.chats.push(context.chat.id);
+        console.info(`Bot initialized on chat: ${context.chat.id}.`);
         this.initialized = true;
-        console.info("Bot initialized.");
         context.reply("Hi! I'm going to inform you about new hot-shots on x-kom.");
       } else {
-        console.info("Bot already initialized.");
+        console.info("Bot already initialized on this chat.");
       }
     });
   }
 
-  async sendMessage(content: string): Promise<Message.TextMessage> {
+  async sendMessage(content: string): Promise<void> {
     if (!this.initialized) {
       throw new Error("Bot is not initialized.");
     }
 
-    return this.telegram.sendMessage(this.chatId, content);
+    for (const chat of this.chats) {
+      this.telegram.sendMessage(chat, content);
+    }
   }
 
-  async sendHotShot(hotshot: HotShot): Promise<Message.PhotoMessage> {
+  async sendHotShot(hotshot: HotShot): Promise<void> {
     if (!this.initialized) {
       throw new Error("Bot is not initialized.");
     }
 
-    return this.telegram.sendPhoto(this.chatId, hotshot.image, {
-      caption: `*${hotshot.name}*\n\n💰~${hotshot.previousPrice}zł~ ${hotshot.price}zł\n📦 Pozostało: ${hotshot.total - hotshot.sold}/${hotshot.total}\n⏰ Koniec o: ${hotshot.endTime.toLocaleString('pl-PL').replace(/\./g, '\\.')}\n\n [Przejdź do X\\-kom](https://www.x\\-kom.pl/goracy\\_strzal)`,
-      parse_mode: 'MarkdownV2',
-    })
+    for (const chat of this.chats) {
+      this.telegram.sendPhoto(chat, hotshot.image, {
+        caption: `*${hotshot.name}*\n\n💰~${hotshot.previousPrice}zł~ ${hotshot.price}zł\n📦 Pozostało: ${hotshot.total - hotshot.sold}/${hotshot.total}\n⏰ Koniec o: ${hotshot.endTime.toLocaleString('pl-PL').replace(/\./g, '\\.')}\n\n [Przejdź do X\\-kom](https://www.x\\-kom.pl/goracy\\_strzal)`,
+        parse_mode: 'MarkdownV2',
+      });
+    }
   }
 }
