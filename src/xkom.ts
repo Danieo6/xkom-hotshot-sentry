@@ -9,7 +9,6 @@ export class Xkom {
     const hotShot = await this.getHotShot();
 
     if (hotShot.name === this.currentOffer) {
-      console.info("Offer is not different!");
       return null;
     }
 
@@ -30,7 +29,7 @@ export class Xkom {
     );
 
     return {
-      name: data.PromotionName,
+      name: this.escapeDots(data.PromotionName),
       previousPrice: data.OldPrice,
       price: data.Price,
       total: data.PromotionTotalCount,
@@ -42,5 +41,9 @@ export class Xkom {
 
   private getRandomUA(): string {
     return Config.userAgents[Math.floor(Math.random() * Config.userAgents.length)];
+  }
+
+  private escapeDots(input: string): string {
+    return input.replace(/\./g, '\\.');
   }
 }
