@@ -30,7 +30,7 @@ export class Xkom {
     );
 
     return {
-      name: this.escapeDots(data.PromotionName),
+      name: this.escape(data.PromotionName),
       previousPrice: data.OldPrice,
       price: data.Price,
       total: data.PromotionTotalCount,
@@ -44,7 +44,14 @@ export class Xkom {
     return Config.userAgents[Math.floor(Math.random() * Config.userAgents.length)];
   }
 
-  private escapeDots(input: string): string {
-    return input.replace(/\./g, '\\.');
+  private escape(input: string): string {
+    return input.replace(/\./g, "\\.")
+      .replace(/\_/g, "\\_")
+      .replace(/\*/g, "\\*")
+      .replace(/\`/g, "\\`")
+      .replace(/\[/g, "\\[")
+      .replace(/\]/g, "\\]")
+      .replace(/\(/g, "\\(")
+      .replace(/\)/g, "\\)");
   }
 }
